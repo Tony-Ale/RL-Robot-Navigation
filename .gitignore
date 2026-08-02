@@ -1,0 +1,74 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local Python tooling
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Build and packaging outputs
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Local third-party source checkouts
+# Keep these in separate repos/forks instead of committing them here.
+/SocNavGym/
+/Python-RVO2/
+/papers/
+/documentation/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# Logs and runtime output
+*.log
+logs/
+wandb/
+runs/
+outputs/
+checkpoints/
+
+# Rendered media / generated experiment artifacts
+*.mp4
+*.avi
+*.mov
+*.gif
+*.jpg
+*.jpeg
+*.png
+img*.jpg
+
+# Public README assets retained from otherwise generated media.
+!/assets/**
+
+# OS/editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Native/C++ build files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.so
+*.o
+
+# Local sandbox/agent mounts
+.agents/
+.codex/

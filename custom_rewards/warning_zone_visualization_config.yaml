@@ -1,0 +1,17 @@
+visualization:
+    enabled: true  # Master switch for drawing enabled human and static-object warning zones during env.render().
+    fill_alpha: 0.25  # Transparency of the filled warning-sector overlay; 0 is invisible, 1 is fully opaque.
+    draw_outline: true  # If true, draw a border around each warning sector.
+    outline_thickness: 2  # Pixel thickness used for the warning-sector border.
+    draw_heading_line: false  # If true, draw a line from each human in the direction of their heading.
+    heading_line_scale: 0.8  # Heading-line length as a fraction of that human's warning-zone radius.
+    draw_labels: true  # If true, draw each human's warning-zone radius and angle near the sector center.
+    sector_resolution_degrees: 4.0  # Angular spacing used to approximate the circular sector polygon.
+    normal_color_bgr: [80, 180, 255]  # BGR color for warning zones that do not currently contain the robot.
+    active_color_bgr: [0, 0, 255]  # BGR color for warning zones that currently contain the robot.
+    static_normal_color_bgr: [255, 180, 80]  # BGR color for inactive static-object warning footprints.
+    static_active_color_bgr: [0, 0, 255]  # BGR color for static warning footprints currently containing the robot.
+    heading_color_bgr: [40, 40, 40]  # BGR color used for human heading lines.
+
+reward_config:
+    path: "custom_rewards/social_safety_reward_config.yaml"  # YAML file containing the warning-zone equation parameters.

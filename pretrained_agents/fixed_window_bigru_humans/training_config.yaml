@@ -1,0 +1,110 @@
+experiment:
+    name: "social_context_fusion_finetuned"  # Human-readable experiment name used in the output folder name.
+    output_root: "runs"  # Parent folder where every experiment run folder is created.
+    seed: 4042  # Base random seed for the environment, action sampling, NumPy, and PyTorch where available.
+    run_id: null
+    resume_run_dir: null #"runs/feedforward_context_fusion_exp_4" #null  # Optional existing run folder to keep appending checkpoints/metrics when resuming across days.
+    copy_config: true  # Save a copy of this YAML into the run folder for reproducibility.
+
+environment:
+    id: "SocNavGym-v1"  # Gym environment id registered by SocNavGym.
+    config_path: "pretrained_agents/fixed_window_bigru_humans/environment_config.yaml"  # Packaged SocNavGym scenario.
+    use_socnavgym_clone: false  # Use socnavgym_clone_path instead of the installed SocNavGym package.
+    socnavgym_clone_path: "SocNavGym"  # Local SocNavGym clone path used when use_socnavgym_clone is true.
+    gymnasium_compatibility: true  # Convert the Gym env/spaces to Gymnasium for modern Stable-Baselines3.
+    render_during_training: false  # Keep false for DRL training; rendering slows training heavily. do not use with multi environments.
+    render_interval_steps: 1  # When render_during_training is true, render every N SB3 timesteps, Ensure it is equal to the env timesteps for smooth rendering.
+    monitor: true  # Wrap env with SB3 Monitor when Stable-Baselines3 is available.
+
+wrappers:
+    diff_drive_action:
+        enabled: true  # Convert PPO's 2-D [linear, angular] action into SocNavGym's [linear, lateral, angular].
+    drop_empty_observation_keys:
+        enabled: true  # Remove zero-length observation keys before SB3 sees the env; prevents terminal-observation reshape errors.
+    fixed_observation_space:
+        enabled: false  # Pad entity observations to fixed counts derived from a target SocNavGym config for curriculum resumes.
+        config_path: "env_configs/env_main.yaml"  # Required target/final SocNavGym YAML when this wrapper is enabled.
+        include_keys: ["humans"]  # Entity keys to fix when present in the derived counts.
+    observation_history:
+        enabled: true  # Add temporal input for BiGRUs; enabling changes observation shapes and requires training a new model.
+        history_length: 8  # Number of observations per sequence; 8 steps represent 2 seconds when the env timestep is 0.25 s.
+        temporal_entity_keys: ["humans"]  # Slot-stable entity keys with genuine history; walls require nearest_wall_segments.mode: "all".
+    astar:
+        enabled: true  # Enable the global A* wrapper before navigation waypoint features.
+        config_path: "global_planning/astar_wrapper_config.yaml"  # YAML config for SocNavAStarWrapper.
+    nearest_wall_segments:
+        enabled: false  # Add the N nearest SocNavGym wall segment observations as a fixed padded "walls" entity input.
+        mode: "nearest"  # "nearest" sorts by surface clearance; "all" preserves every segment in SocNavGym order.
+        count: 4  # Fixed wall capacity. All mode raises an error instead of dropping segments when this is too small.
+        include_boundary_walls: false  # False exposes corridor walls only; supported for square and rectangle rooms.
+        observation_key: "walls"  # Observation key consumed by architecture.entity_keys.
+    navigation_features:
+        enabled: true  # Add coordinate-frame waypoint features to the observation dict.
+        config_path: "navigation_features/config.yaml"  # YAML config for CoordinateFrameWaypointWrapper.
+    warning_zone_visualization:
+        enabled: false  # Draw warning zones during render; keep false during training.
+        config_path: "custom_rewards/warning_zone_visualization_config.yaml"  # YAML config for the visualization wrapper.
+
+architecture:
+    name: "social_context_fusion"  # One of: eb_cadrl, social_context_fusion, feedforward_social_context_fusion, joint_pair_context_fusion, hybrid_context_fusion, dual_context_fusion, joint_scene_fusion, crowd_context_fusion, hcam_fusion.
+    config_path: "pretrained_agents/fixed_window_bigru_humans/architecture_config.yaml"  # Packaged architecture config.
+    entity_keys: ["humans"] #["humans", "laptops", "tables", "plants", "walls"]  # Observation dict keys treated as human/entity observations.
+    entity_feature_dim: 14  # Number of features per entity row in SocNavGym observations.
+    mask_zero_entities: true  # Treat all-zero entity rows as padding and mask them from attention.
+    include_waypoint_features: true  # Extend the robot observation with waypoint_features before the architecture processes it.
+
+ppo:
+    policy: "MultiInputPolicy"  # Use MultiInputPolicy for SocNavGym dict observations.
+    learning_rate: 0.0001  # PPO optimizer learning rate.
+    n_steps: 2048  # Rollout steps per environment before each PPO update.
+    batch_size: 64  # Minibatch size used during PPO updates.
+    n_epochs: 1  # Number of PPO optimization epochs per rollout.
+    gamma: 0.99  # Discount factor.
+    gae_lambda: 0.95  # GAE lambda for bias/variance tradeoff.
+    clip_range: 0.2  # PPO clipping range.
+    ent_coef: 0.0  # Entropy coefficient.
+    vf_coef: 0.5  # Value-function loss coefficient.
+    max_grad_norm: 0.5  # Gradient clipping norm.
+    target_kl: null  # Optional KL limit for early stopping PPO updates; null disables it.
+    device: "auto"  # auto, cpu, cuda, etc.
+    verbose: 1  # SB3 verbosity level.
+    policy_net_arch: [150, 100, 100]  # Extra actor/critic hidden layers after the custom feature extractor; [] keeps it minimal.
+
+training:
+    total_timesteps: 1000000  # Total PPO environment steps to train for.
+    num_envs: 1  # Number of parallel environments.
+    vec_env: "dummy"  # dummy or subproc; dummy is easier to debug and lighter on RAM.
+    checkpoint_interval_steps: 50000  # Save model checkpoints every N environment steps.
+    log_interval: 1  # SB3 PPO log interval in rollout iterations.
+    reset_num_timesteps: false  # Reset SB3 timestep count unless resuming from a checkpoint.
+    resume_from_checkpoint: null
+
+metrics:
+    eta_log_interval_steps: 1000  # How often to print/log estimated remaining training time.
+    navigation_training_csv: "navigation_training_metrics.csv"  # Per-episode navigation metrics collected during training.
+    navigation_evaluation_csv: "navigation_evaluation_metrics.csv"  # Evaluation metrics saved during eval runs.
+
+evaluation:
+    enabled: true  # Periodically run deterministic evaluation episodes during training.
+    eval_interval_steps: 50000  # Evaluate every N environment steps.
+    n_eval_episodes: 100  # Number of evaluation episodes per evaluation event.
+    deterministic: true  # Use deterministic action selection during evaluation.
+    eval_seed_base: 11042  # First fixed validation seed; later eval episode seeds increment by one.
+    fixed_episode_seeds: true  # Reuse the same eval seeds at every interval: seed_base, seed_base+1, ...
+
+testing:
+    policy_type: "ppo"  # Standard Stable-Baselines3 PPO checkpoint.
+    enabled: true  # Enable the post-training testing configuration.
+    run_after_training: false  # If true, test the final trained agent immediately after training completes.
+    overwrite_existing: true  # Replace prior final-testing CSV/JSON files for this run instead of appending duplicates.
+    checkpoint_path: null  # Optional checkpoint to test; null uses the final checkpoint from the run.
+    deterministic: true  # Use deterministic learned-agent actions for reproducible final testing.
+    test_seed_offset: 20000  # Base offset added to experiment.seed for held-out test episode seeds.
+    n_test_episodes: 50  # Number of held-out test episodes.
+    fixed_test_seeds: true  # Use seed, seed+1, ... so learned agent and ORCA are paired by scenario.
+    compare_with_baseline: true  # Run the ORCA robot baseline on the same test seeds.
+    baseline: "orca"  # Only ORCA is implemented as the final testing baseline.
+    agent_csv: "test_agent_metrics.csv"  # Per-episode learned-agent test metrics.
+    baseline_csv: "test_orca_metrics.csv"  # Per-episode ORCA baseline test metrics.
+    comparison_csv: "agent_vs_orca_comparison.csv"  # Paired learned-agent vs ORCA comparison rows.
+    summary_json: "test_summary.json"  # Aggregate test and comparison summary.

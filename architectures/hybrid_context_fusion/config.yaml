@@ -1,0 +1,45 @@
+model:
+    robot_input_dim: 9  # Number of features per robot observation timestep.
+    entity_input_dim: 14  # SocNavGym entity row: 6 type values followed by 8 state values.
+    output_dim: 1  # Number of values produced when the optional prediction head is enabled.
+    return_attention: true  # Return attention weights and intermediate tensors for inspection.
+
+sequence_encoding:
+    robot_gru_hidden_size: 20  # Hidden size per direction for the robot BiGRU.
+    entity_gru_hidden_size: 20  # Hidden size per direction for the human BiGRU.
+    robot_gru_layers: 1  # Number of stacked robot BiGRU layers.
+    entity_gru_layers: 1  # Number of stacked human BiGRU layers.
+    dropout: 0.0  # Dropout between GRU layers; active only when layers > 1.
+
+static_entity_embedding:
+    hidden_dims: [256, 128, 64]  # MLP hidden sizes for the current table, wall, laptop, or plant observation.
+    output_dim: 40  # Static-entity embedding size.
+    activation: "relu"  # Activation used after hidden linear layers.
+    dropout: 0.0  # Dropout applied after hidden activations.
+
+interaction_embedding:
+    hidden_dims: [150, 100]  # Maps each robot/entity context pair into a shared interaction embedding.
+    activation: "relu"
+    dropout: 0.0
+
+feature_reduction:
+    hidden_dims: [100]
+    output_dim: 45  # Attention pooling produces a 45-D social context.
+    activation: "relu"
+    dropout: 0.0
+
+attention:
+    hidden_dims: [100, 100]
+    activation: "relu"
+    dropout: 0.0
+    use_mask: true  # Exclude padded entity rows from pooling.
+
+prediction_head:
+    enabled: false  # PPO consumes the fused 85-D feature and supplies its own actor/critic heads.
+    hidden_dims: [150, 100, 100]
+    activation: "relu"
+    dropout: 0.0
+
+initialization:
+    orthogonal_gru: true
+    linear_gain: 1.0

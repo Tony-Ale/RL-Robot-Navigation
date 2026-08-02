@@ -1,0 +1,15 @@
+rendering:
+    training_config_path: "pretrained_agents/persistent_state_humans_plants/training_config.yaml"
+    run_dir: "pretrained_agents/persistent_state_humans_plants"
+    checkpoint_path: "pretrained_agents/persistent_state_humans_plants/model.zip"
+    policy_type: "stateful_ppo"
+    device: "auto"
+    seed: 24150
+    episodes: 1
+    deterministic: true
+    delay_seconds: 0.0
+    warning_zones: true
+    path_waypoints: true
+    record_video: false
+    video_path: "assets/persistent_state_humans_plants_longest_success.mp4"
+    video_fps: 4.0

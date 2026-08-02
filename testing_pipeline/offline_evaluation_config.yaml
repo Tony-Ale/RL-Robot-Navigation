@@ -1,0 +1,49 @@
+offline_evaluation:
+    training_config_path: "runs/example_run/experiment_config.yaml"  # Archived training config used to rebuild the environment.
+    run_dir: "runs/example_run"  # Run folder containing checkpoints/.
+    output_dir: "offline_evaluation"  # Output folder created inside run_dir.
+    mode: "evaluate_only"  # Options: evaluate_and_plot, evaluate_only, or plot_only.
+
+    n_eval_episodes: 100  # Number of valid episodes evaluated per controller.
+    seed_base: 11042  # First deterministic evaluation seed.
+    fixed_episode_seeds: true  # Use seed_base, seed_base+1, ... for every controller.
+    deterministic: true  # Use deterministic learned-policy actions.
+    policy_type: null  # Options: ppo, stateful_ppo, or null to infer from the training config.
+
+    checkpoint_source: "final"  # Options: all, step, final, or list.
+    checkpoint_filenames: []  # Checkpoint filenames used only when checkpoint_source is list.
+    overwrite_existing: false  # Preserve completed checkpoint evaluations and skip them on reruns.
+    include_orca: true  # Evaluate ORCA on the learned agent's valid episode seeds.
+
+    episode_csv: "checkpoint_episode_metrics.csv"  # Per-episode checkpoint/controller metrics.
+    summary_csv: "checkpoint_summary_metrics.csv"  # Aggregate checkpoint/controller metrics.
+    comparison_csv: "checkpoint_orca_comparison.csv"  # Per-seed learned-agent and ORCA comparison.
+
+    progress:
+        enabled: true  # Print evaluation progress and estimated remaining time.
+
+    plots:
+        save: true  # Save enabled plots.
+        show: false  # Display enabled plots interactively.
+        output_dir: "plots"  # Plot folder created inside the evaluation output folder.
+        dpi: 180
+
+        architecture_comparison:
+            enabled: false  # Compare checkpoint-summary CSVs from multiple architecture runs.
+            max_step: null  # Optional maximum common checkpoint step.
+            metrics: [success_rate, collision_rate, mean_episode_reward, mean_a_star_spl]
+            models: []  # Each model requires label, summary_csv, and optional controller.
+
+        final_outcomes:
+            enabled: false  # Compare final episode outcomes and metrics across controllers.
+            require_matching_seeds: true
+            models: []  # Each model requires label, episode_csv, checkpoint_step, and controller.
+            metrics:
+                - name: "A_STAR_SPL"
+                  successful_only: false
+
+        training_curves:
+            enabled: false  # Plot rolling training metrics from one or more run segments.
+            rolling_window_episodes: 100
+            metrics: [episode_reward, SUCCESS, COLLISION]
+            models: []  # Each model requires a label and one or more run_dir or csv segments.

@@ -1,0 +1,39 @@
+model:
+    robot_input_dim: 9  # Features in the current robot observation, including configured navigation features.
+    entity_input_dim: 14  # Features in one current SocNavGym entity observation row.
+    output_dim: 1  # Values produced by the optional prediction head.
+    return_attention: true  # Expose attention and intermediate contexts for inspection.
+
+observation_encoding:
+    robot_hidden_dims: [150, 100]  # Hidden layers in the current-observation robot MLP.
+    robot_output_dim: 64  # Robot embedding size.
+    entity_hidden_dims: [150, 100]  # Hidden layers in the MLP shared by every entity row.
+    entity_output_dim: 64  # Entity embedding size.
+    activation: "relu"
+    dropout: 0.0
+
+interaction_embedding:
+    hidden_dims: [150, 100]  # Map each robot-entity pair to the same u_k embedding used by social_context_fusion.
+    activation: "relu"
+    dropout: 0.0
+
+feature_reduction:
+    hidden_dims: [100]  # Reduce each interaction embedding before attention-weighted pooling.
+    output_dim: 64
+    activation: "relu"
+    dropout: 0.0
+
+attention:
+    hidden_dims: [100, 100]  # Score each interaction from its local embedding and masked global context.
+    activation: "relu"
+    dropout: 0.0
+    use_mask: true  # Exclude zero-padded entities from global context, attention, and pooling.
+
+prediction_head:
+    enabled: false  # PPO consumes the fused 128-D feature tensor through its own actor and critic heads.
+    hidden_dims: [150, 100, 100]
+    activation: "relu"
+    dropout: 0.0
+
+initialization:
+    linear_gain: 1.0  # Xavier gain used for all linear layers.

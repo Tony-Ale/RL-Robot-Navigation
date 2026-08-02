@@ -1,0 +1,39 @@
+model:
+    robot_input_dim: 9  # Number of features per robot observation timestep.
+    entity_input_dim: 14  # Number of features per human/entity observation timestep.
+    output_dim: 1  # Number of values produced by the final head; use 1 for a value/critic output.
+    return_attention: true  # Return attention weights and intermediate context tensors for debugging.
+
+sequence_encoding:
+    robot_gru_hidden_size: 32  # Hidden size per direction for the robot BiGRU encoder.
+    entity_gru_hidden_size: 32  # Hidden size per direction for the entity BiGRU encoder.
+    robot_gru_layers: 1  # Number of stacked GRU layers used for robot history.
+    entity_gru_layers: 1  # Number of stacked GRU layers used for entity histories.
+    dropout: 0.0  # Dropout between GRU layers; only active when layers > 1.
+
+interaction_embedding:
+    hidden_dims: [150, 100]  # MLP sizes that map robot/entity recurrent features into u_k embeddings.
+    activation: "relu"  # Activation used after hidden linear layers: relu, tanh, gelu, or elu.
+    dropout: 0.0  # Dropout applied after hidden activations in the interaction MLP.
+
+feature_reduction:
+    hidden_dims: [100]  # Hidden sizes before reducing each u_k feature vector.
+    output_dim: 64  # Reduced feature size for lambda_k before attention-weighted pooling.
+    activation: "relu"  # Activation used in the feature-reduction MLP.
+    dropout: 0.0  # Dropout applied after hidden activations in the feature-reduction MLP.
+
+attention:
+    hidden_dims: [100, 100]  # Hidden sizes for the attention network applied to [u_k, global_mean].
+    activation: "relu"  # Activation used in the attention MLP.
+    dropout: 0.0  # Dropout applied after hidden activations in the attention MLP.
+    use_mask: true  # Ignore padded entities when computing attention weights.
+
+prediction_head:
+    enabled: false  # Disabled for PPO; PPO uses the fused 128-D feature tensor and its own actor/critic heads.
+    hidden_dims: [150, 100, 100]  # Final MLP hidden sizes after concatenating robot context and social context.
+    activation: "relu"  # Activation used in the prediction/value head.
+    dropout: 0.0  # Dropout applied after hidden activations in the final head.
+
+initialization:
+    orthogonal_gru: true  # Apply orthogonal initialization to recurrent GRU weights.
+    linear_gain: 1.0  # Xavier gain used for linear layers.

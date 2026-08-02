@@ -1,0 +1,30 @@
+model:
+    entity_input_dim: 14  # Features in one SocNavGym entity observation row.
+
+sequence_encoding:
+    robot_gru_hidden_size: 64  # Stateful unidirectional robot GRU hidden size.
+    entity_gru_hidden_size: 64  # Stateful unidirectional hidden size shared by all entity slots.
+    robot_gru_layers: 1  # Number of stacked robot GRU layers.
+    entity_gru_layers: 1  # Number of stacked entity GRU layers.
+    dropout: 0.0  # Dropout between recurrent layers; active only when layers > 1.
+
+interaction_embedding:
+    hidden_dims: [150, 100]  # Map each robot-entity recurrent pair to an interaction embedding.
+    activation: "relu"
+    dropout: 0.0
+
+feature_reduction:
+    hidden_dims: [100]  # Reduce interaction embeddings before attention-weighted pooling.
+    output_dim: 64
+    activation: "relu"
+    dropout: 0.0
+
+attention:
+    hidden_dims: [100, 100]  # Score each interaction using its local and global crowd context.
+    activation: "relu"
+    dropout: 0.0
+    use_mask: true  # Exclude zero-padded human rows from means, softmax, and pooling.
+
+initialization:
+    orthogonal_gru: true
+    linear_gain: 1.0

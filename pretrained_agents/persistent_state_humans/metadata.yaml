@@ -1,0 +1,33 @@
+name: "Persistent-State GRU - Humans"
+architecture: "stateful_social_context_fusion"
+policy_type: "stateful_ppo"
+checkpoint: "model.zip"
+checkpoint_sha256: "a7a6a55e44c4d8f66f67e1a8b7cb05267604950e4c75143a28a8236fbe7ea786"
+entity_keys: ["humans"]
+training_steps: 1575000
+training_seed: 4042
+suggested_render_seed: 24045
+
+selection:
+    criterion: "Highest validation success rate in the selected training lineage"
+    validation_episodes: 100
+    validation_seed_base: 11042
+    validation_success_rate: 0.83
+
+held_out_evaluation:
+    episodes: 500
+    seed_base: 24042
+    deterministic: true
+    success_rate: 0.822
+    collision_rate: 0.178
+    timeout_rate: 0.0
+    mean_reward: 7.725687577058593
+    mean_a_star_spl: 0.752454282513711
+
+provenance:
+    original_run: "20260719_012306_recurrent_ppo_stateful_reduced_epoch"
+    original_checkpoint: "ppo_step_1575000.zip"
+    training_config: "Adapted from the run's experiment_config.yaml only to use packaged paths and disable resumption."
+    environment_config: "Copied from the environment path recorded by the run."
+    architecture_config: "Copied from the repository architecture path recorded by the run."
+    reward_config: "Current repository reward configuration copied for reference; the original run did not archive this file."

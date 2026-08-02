@@ -1,0 +1,35 @@
+coordinate_frame:
+    mode: "heading_aligned"  # Active robot-centric frame: "heading_aligned" uses the robot heading as +x; "goal_aligned" uses the robot-to-goal direction as +x.
+    transform_observations: true  # Rotate SocNavGym observations into the selected coordinate frame.
+
+waypoint_features:
+    enabled: true  # If true, add a waypoint feature vector to each observation dictionary.
+    observation_key: "waypoint_features"  # Observation dictionary key used for the generated waypoint vector.
+    max_waypoints: 2  # Number of upcoming sequential waypoints exposed to the policy as a sliding window.
+    waypoint_interval: null  # Optional waypoint spacing in meters; null reuses the waypoint interval from the A* wrapper.
+    replan_if_missing: true  # If true, call plan_from_robot_to_goal() when no current A* plan is available.
+    include_position: true  # Include waypoint x and y coordinates in the active robot-centric frame.
+    include_distance: true  # Include Euclidean distance from the robot to each waypoint.
+    include_bearing: true  # Include bearing angle atan2(y, x) for each waypoint in the active frame.
+    include_bearing_sin_cos: false  # Include sin(bearing) and cos(bearing), useful when avoiding angle discontinuities.
+    advance_radius: 0.3  # Radius in metres used to advance the sliding waypoint window after a waypoint is reached.
+    skip_failed_reset_episodes: true  # If true, reset internally until planner waypoints exist before exposing an episode to PPO.
+    max_reset_attempts: 20  # Maximum internal reset attempts before raising an error for repeated planner failure.
+    flatten: true  # If true, return one flat vector; if false, return a [max_waypoints, feature_dim] sequence.
+    pad_value: 0.0  # Value used only when no waypoints are available; short non-empty windows repeat the last waypoint.
+
+visualization:
+    enabled: false  # If true, draw the waypoint slots currently exposed to the policy during render.
+    draw_waypoint_window: true  # Draw the current waypoint observation window, not the full A* path.
+    draw_skipped_waypoints: true  # Draw waypoints that have already fallen out of the current policy window.
+    draw_active_waypoint: true  # Draw the first waypoint slot with the active waypoint color.
+    slot_colors_bgr: [[0, 0, 255], [255, 255, 0], [0, 255, 255], [255, 0, 255]]  # Per-slot OpenCV BGR colors for the policy-facing waypoint window.
+    skipped_waypoint_color_bgr: [120, 120, 120]  # OpenCV BGR color for reached/passed waypoints no longer fed to the policy.
+    window_waypoint_color_bgr: [255, 255, 0]  # OpenCV BGR color for non-active waypoint slots.
+    active_waypoint_color_bgr: [0, 0, 255]  # OpenCV BGR color for the active waypoint slot.
+    active_waypoint_radius: 8  # Radius in pixels for the active waypoint slot.
+    skipped_waypoint_radius: 4  # Radius in pixels for skipped waypoint markers.
+    waypoint_thickness: 2  # Ring thickness in pixels for policy-facing waypoint slots.
+    skipped_waypoint_thickness: 1  # Ring thickness in pixels for skipped waypoint markers.
+    draw_slot_labels: true  # Label slots as 1, 2, ... so the policy input order is visible.
+    label_color_bgr: [255, 255, 255]  # OpenCV BGR color for slot labels.

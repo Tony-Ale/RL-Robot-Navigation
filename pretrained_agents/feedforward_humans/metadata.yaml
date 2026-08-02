@@ -1,0 +1,33 @@
+name: "Feedforward MLP - Humans"
+architecture: "feedforward_social_context_fusion"
+policy_type: "ppo"
+checkpoint: "model.zip"
+checkpoint_sha256: "62b5e32cc3538db753a18bb7d559a395ee8399bbe640402b34b798a703cfd68d"
+entity_keys: ["humans"]
+training_steps: 1400000
+training_seed: 4042
+suggested_render_seed: 24045
+
+selection:
+    criterion: "Highest validation success rate in the selected training lineage"
+    validation_episodes: 100
+    validation_seed_base: 11042
+    validation_success_rate: 0.86
+
+held_out_evaluation:
+    episodes: 500
+    seed_base: 24042
+    deterministic: true
+    success_rate: 0.814
+    collision_rate: 0.184
+    timeout_rate: 0.002
+    mean_reward: 7.551156918881378
+    mean_a_star_spl: 0.7218303760907439
+
+provenance:
+    original_run: "feedforward_context_fusion_exp_4_finetuned"
+    original_checkpoint: "ppo_step_1400000.zip"
+    training_config: "Adapted from the run's experiment_config.yaml only to use packaged paths and disable resumption."
+    environment_config: "Copied from the environment path recorded by the run."
+    architecture_config: "Copied from the repository architecture path recorded by the run."
+    reward_config: "Current repository reward configuration copied for reference; the original run did not archive this file."

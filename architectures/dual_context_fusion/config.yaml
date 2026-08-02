@@ -1,0 +1,61 @@
+model:
+    robot_input_dim: 9  # Number of features per robot observation timestep; the training extractor extends this when waypoints are enabled.
+    entity_input_dim: 14  # SocNavGym entity row: 6 type values followed by 8 state values.
+    output_dim: 1  # Number of values produced when the optional prediction head is enabled.
+    return_attention: true  # Return branch attention weights and intermediate contexts for inspection.
+
+sequence_encoding:
+    robot_gru_hidden_size: 20  # Hidden size per direction for the robot BiGRU.
+    human_gru_hidden_size: 20  # Hidden size per direction for the human BiGRU.
+    robot_gru_layers: 1  # Number of stacked robot BiGRU layers.
+    human_gru_layers: 1  # Number of stacked human BiGRU layers.
+    robot_dropout: 0.0  # Dropout between robot GRU layers; active only when layers > 1.
+    human_dropout: 0.0  # Dropout between human GRU layers; active only when layers > 1.
+
+static_entity_embedding:
+    hidden_dims: [256, 128, 64]  # MLP hidden sizes applied independently to each current static-entity row.
+    output_dim: 40  # Static representation size before robot-conditioned obstacle interaction.
+    activation: "relu"
+    dropout: 0.0
+
+human_interaction_embedding:
+    hidden_dims: [150, 100]  # Human-specific mapping from [robot context, human context].
+    activation: "relu"
+    dropout: 0.0
+
+static_interaction_embedding:
+    hidden_dims: [150, 100]  # Static-specific mapping from [robot context, static representation].
+    activation: "relu"
+    dropout: 0.0
+
+human_feature_reduction:
+    hidden_dims: [100]
+    output_dim: 45  # Fixed human-context size after human attention pooling.
+    activation: "relu"
+    dropout: 0.0
+
+static_feature_reduction:
+    hidden_dims: [100]
+    output_dim: 45  # Fixed obstacle-context size after static attention pooling.
+    activation: "relu"
+    dropout: 0.0
+
+human_attention:
+    hidden_dims: [100, 100]  # Scores humans using [human interaction, mean human interaction].
+    activation: "relu"
+    dropout: 0.0
+
+static_attention:
+    hidden_dims: [100, 100]  # Scores static entities using [static interaction, mean static interaction].
+    activation: "relu"
+    dropout: 0.0
+
+prediction_head:
+    enabled: false  # PPO consumes [robot context, human context, obstacle context] and supplies its own actor/critic heads.
+    hidden_dims: [150, 100, 100]
+    activation: "relu"
+    dropout: 0.0
+
+initialization:
+    orthogonal_gru: true  # Orthogonally initialize recurrent GRU weights.
+    linear_gain: 1.0  # Xavier gain for linear layers.

@@ -1,0 +1,18 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+numpy==1.26.4
+torch==2.4.0+cpu
+torchvision==0.19.0+cpu
+gym==0.26.2
+gymnasium==1.0.0
+stable-baselines3==2.4.1
+sb3-contrib==2.4.0
+dgl==2.4.0
+opencv-python==4.9.0.80
+matplotlib==3.10.9
+PyYAML==6.0.3
+shapely==2.1.2
+tensorboard==2.20.0
+Cython==3.2.5
+pyrvo2 @ git+https://github.com/sybrenstuvel/Python-RVO2.git@c2c46ba8d59556aa10faf03479293236efea154d
+socnavgym @ git+https://github.com/Tony-Ale/SocNavGym.git@d5ac6597fad1b0d13efbf2678f274c0607e24507

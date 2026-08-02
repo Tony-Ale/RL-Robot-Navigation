@@ -1,0 +1,55 @@
+grid:
+    resolution: 0.1  # Width/height of each occupancy-grid cell in metres; smaller is more precise but slower.
+    padding: 0.0  # Extra metres added around the SocNavGym map bounds when building the grid.
+
+obstacles:
+    inflation_radius: 0.2  # Obstacle inflation radius in metres; null means robot_radius + safety_margin.
+    safety_margin: 0.1  # Extra clearance added to the robot radius when inflation_radius is null.
+    include_walls: true  # Treat SocNavGym walls as occupied cells.
+    include_tables: true  # Treat tables as occupied cells.
+    include_laptops: true  # Treat laptops as occupied cells.
+    include_plants: true  # Treat plants as occupied cells.
+    include_static_humans: false  # Treat static humans as occupied cells.
+    include_static_crowds: false  # Treat static human-human interaction groups as occupied cells.
+    include_human_laptop_interactions: false  # Treat human-laptop interaction pairs as occupied cells.
+    include_dynamic_humans: false  # Treat moving humans as occupied cells; useful for reactive replanning.
+    include_dynamic_crowds: false  # Treat moving human-human interaction groups as occupied cells.
+
+cost_map:
+    enabled: true  # Use a soft traversal cost around obstacles instead of only binary free/occupied cells.
+    obstacle_cost_weight: 4.0  # Strength of the extra cost near occupied cells.
+    obstacle_cost_decay: 0.6  # Distance in metres over which obstacle cost decays.
+    dynamic_human_cost_weight: 2.0  # Reserved weight for dynamic-human social costs.
+    dynamic_human_cost_decay: 0.8  # Reserved decay distance for dynamic-human social costs.
+    normalize: true  # Normalize finite traversal costs so the minimum cost is 1.
+
+planner:
+    allow_diagonal: true  # Allow A* to move diagonally between grid cells.
+    diagonal_corner_cutting: false  # Prevent diagonal moves through the corner of two occupied cells.
+    heuristic_weight: 1.0  # Weight on the Euclidean heuristic; values above 1 can be faster but less optimal.
+    snap_start_goal_to_free: true  # Move blocked start/goal cells to the nearest free cell before planning.
+    max_snap_distance: 1.0  # Maximum metres to search when snapping a blocked start or goal cell.
+    replan_on_reset: true  # Build a plan automatically after each environment reset.
+    replan_each_step: false  # Replan after every environment step; useful with dynamic obstacles but slower.
+
+waypoints:
+    interval: 1.5  # Distance in metres between extracted path waypoints.
+    include_start: false  # Include the robot start position in the waypoint list.
+    include_goal: true  # Include the robot goal position in the waypoint list.
+
+render:
+    enabled: true  # Draw the global plan overlay when SocNavGym renders.
+    draw_grid: true  # Draw occupied grid cells as a debug overlay.
+    grid_alpha: 0.25  # Transparency of the occupied-grid debug overlay.
+    draw_path: true  # Draw the full A* path as a polyline.
+    draw_waypoints: true  # Draw waypoint markers sampled along the path.
+    draw_checkpoint_radius: true  # Draw checkpoint reward circles around sampled waypoints.
+    checkpoint_radius: 0.3  # Rendered checkpoint radius in metres.
+    checkpoint_radius_color_bgr: [0, 180, 255]  # OpenCV BGR color for checkpoint reward radius circles.
+    checkpoint_radius_thickness: 1  # Circle outline thickness in pixels; use -1 to fill.
+    path_color_bgr: [255, 0, 255]  # OpenCV BGR color for the A* path line.
+    waypoint_color_bgr: [0, 255, 255]  # OpenCV BGR color for sampled waypoint markers.
+    start_color_bgr: [0, 255, 0]  # OpenCV BGR color for the robot start marker.
+    goal_color_bgr: [0, 0, 255]  # OpenCV BGR color for the goal marker.
+    path_thickness: 2  # Thickness of the rendered A* path line in pixels.
+    waypoint_radius: 4  # Radius of rendered waypoint markers in pixels.

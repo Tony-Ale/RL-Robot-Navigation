@@ -1,0 +1,57 @@
+pipeline_config: "pretrained_agents/persistent_state_humans/training_config.yaml"  # Pipeline config used to rebuild the packaged humans environment.
+
+policy:
+    type: "stateful_ppo"  # random, orca, ppo, or stateful_ppo.
+    checkpoint: "pretrained_agents/persistent_state_humans/model.zip"  # Policy checkpoint to inspect.
+    deterministic: true  # Used for ppo and stateful_ppo action selection.
+
+episode:
+    seed: 24045  # Successful held-out scenario used by the packaged model.
+    max_steps: 401  # Maximum number of env steps to inspect.
+
+failure_analysis:
+    enabled: false  # If true, run many seeded episodes and summarize initial spawn clearance for failed episodes.
+    seed: 11045  # First reset seed; later valid episodes use incremented seeds.
+    episodes: 100  # Number of completed episodes to analyze.
+    max_steps: 401  # Maximum steps per analyzed episode.
+    clearance_threshold: 0.3  # Report the percentage of failures whose initial nearest-entity clearance is below this value in meters.
+
+stall_analysis:
+    enabled: false  # If true, run many seeded episodes and summarize rolling robot displacement for stall tuning.
+    seed: 11061  # First reset seed; later valid episodes use incremented seeds.
+    episodes: 50  # Number of completed episodes to analyze.
+    max_steps: 401  # Maximum steps per analyzed episode.
+    window_steps: [8, 12, 16, 20]  # Candidate displacement windows measured in env steps.
+    displacement_thresholds: [0.05, 0.1, 0.15, 0.2]  # Candidate min_displacement values in meters.
+
+wall_segment_analysis:
+    enabled: false  # Analyze live wall rows without loading a policy or running the step-by-step inspector.
+    config_path: "env_configs/env_main.yaml"  # SocNavGym room configuration whose wall capacity should be checked.
+    seed_start: 0  # First deterministic environment seed in the live geometry sweep.
+    episodes: 100  # Number of seeded wall layouts to inspect.
+    segment_sizes: [15.0]  # Wall segment sizes to validate without modifying the source environment YAML.
+    include_boundary_walls: false  # Match corridor-only wall observations when validating capacity.
+
+trajectory_analysis:
+    enabled: false  # Replay selected seeds and save top-down robot trajectory snapshots.
+    seeds: [24045]  # Episode seeds to replay when enabled.
+    max_steps: 401  # Maximum number of actions before marking the trace as max_steps_reached.
+    require_astar: true  # Fail clearly if the configured environment has no reset-time A* reference path.
+    output_dir: "outputs/trajectory_analysis"
+    dpi: 180
+
+debug:
+    verbosity: 2  # 1: summary, 2: shapes/masks/reward components, 3: full entity masks and rows.
+    entity_keys: ["humans", "laptops", "tables", "plants", "walls"]  # Entity observation keys to inspect.
+    entity_feature_dim: 14  # SocNavGym entity row size.
+
+render:
+    enabled: true  # Render the environment during inspection.
+    wait_ms: 1  # OpenCV wait time after each rendered frame.
+
+visualization:
+    warning_zones: true  # Use the pipeline's warning-zone wrapper during inspection without changing the training config.
+    nearest_walls: false  # Draw currently exposed nearest wall segment rows from obs["walls"].
+    nearest_wall_color_bgr: [255, 255, 0]  # Cyan rings for nearest wall segment centers.
+    nearest_wall_radius: 5
+    nearest_wall_thickness: 2

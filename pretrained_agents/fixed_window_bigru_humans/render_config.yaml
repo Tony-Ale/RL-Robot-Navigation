@@ -1,0 +1,15 @@
+rendering:
+    training_config_path: "pretrained_agents/fixed_window_bigru_humans/training_config.yaml"
+    run_dir: "pretrained_agents/fixed_window_bigru_humans"
+    checkpoint_path: "pretrained_agents/fixed_window_bigru_humans/model.zip"
+    policy_type: "ppo"
+    device: "auto"
+    seed: 24417
+    episodes: 1
+    deterministic: true
+    delay_seconds: 0.0
+    warning_zones: false
+    path_waypoints: true
+    record_video: false
+    video_path: "videos/fixed_window_bigru_humans.mp4"
+    video_fps: 10.0

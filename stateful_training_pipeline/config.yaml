@@ -1,0 +1,107 @@
+experiment:
+    name: "stateful_social_context_fusion"
+    output_root: "runs"
+    seed: 5042
+    run_id: null
+    resume_run_dir: null
+    copy_config: true
+
+environment:
+    id: "SocNavGym-v1"
+    config_path: "env_configs/env_humans_plants.yaml"
+    use_socnavgym_clone: false  # Use socnavgym_clone_path instead of the installed SocNavGym package.
+    socnavgym_clone_path: "SocNavGym"
+    gymnasium_compatibility: true
+    render_during_training: false
+    render_interval_steps: 1
+    monitor: true
+
+wrappers:
+    diff_drive_action:
+        enabled: true
+    drop_empty_observation_keys:
+        enabled: true
+    fixed_observation_space:
+        enabled: false  # Pad selected native entity observations to counts from a target SocNavGym config.
+        config_path: "env_configs/env_main.yaml"  # SocNavGym config used to derive fixed entity counts.
+        include_keys: ["humans"]  # Native entity keys to fix; wall capacity belongs to nearest_wall_segments.
+    observation_history:
+        enabled: false  # Stack recent observations into temporal inputs.
+        history_length: 8
+        temporal_entity_keys: ["humans"]  # Entity keys whose observations are tracked over time.
+    astar:
+        enabled: true
+        config_path: "global_planning/astar_wrapper_config.yaml"
+    nearest_wall_segments:
+        enabled: false  # Add fixed-capacity wall-segment observations.
+        mode: "all"  # Options: nearest or all.
+        count: 4  # Maximum number of wall-segment rows.
+        include_boundary_walls: false  # Include room-boundary walls in wall observations.
+        observation_key: "walls"  # Observation key used for wall-segment rows.
+    navigation_features:
+        enabled: true
+        config_path: "navigation_features/config.yaml"
+    warning_zone_visualization:
+        enabled: false
+        config_path: "custom_rewards/warning_zone_visualization_config.yaml"
+
+architecture:
+    name: "stateful_social_context_fusion"
+    config_path: "architectures/stateful_social_context_fusion/config.yaml"
+    entity_keys: ["humans", "plants"]  # Options: humans, laptops, tables, plants, and walls.
+    entity_feature_dim: 14  # SocNavGym feature width shared by every configured entity row.
+    mask_zero_entities: true  # Keep padded entity slots out of recurrent state, context means and attention.
+    include_waypoint_features: true  # Append waypoint features to the robot input before its stateful GRU.
+
+ppo:
+    learning_rate: 0.0001
+    n_steps: 2048  # Ordered rollout steps retained by recurrent PPO.
+    batch_size: 64  # Transition budget per recurrent minibatch; temporal order is preserved inside sequences.
+    n_epochs: 1
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    target_kl: null
+    device: "auto"
+    verbose: 1
+    policy_net_arch: [150, 100, 100]
+
+training:
+    total_timesteps: 500000
+    num_envs: 1
+    vec_env: "dummy"
+    checkpoint_interval_steps: 50000
+    log_interval: 1
+    reset_num_timesteps: true
+    resume_from_checkpoint: null  # Stateful checkpoint to continue; null starts a new model.
+
+metrics:
+    eta_log_interval_steps: 1000
+    navigation_training_csv: "navigation_training_metrics.csv"
+    navigation_evaluation_csv: "navigation_evaluation_metrics.csv"
+
+evaluation:
+    enabled: true
+    eval_interval_steps: 50000
+    n_eval_episodes: 100
+    deterministic: true
+    eval_seed_base: 11042
+    fixed_episode_seeds: true
+
+testing:
+    policy_type: "stateful_ppo"  # Options: ppo or stateful_ppo.
+    overwrite_existing: true
+    checkpoint_path: null
+    deterministic: true
+    test_seed_offset: 20000
+    n_test_episodes: 50
+    fixed_test_seeds: true
+    compare_with_baseline: true
+    baseline: "orca"
+    agent_csv: "test_agent_metrics.csv"
+    baseline_csv: "test_orca_metrics.csv"
+    comparison_csv: "agent_vs_orca_comparison.csv"
+    summary_json: "test_summary.json"

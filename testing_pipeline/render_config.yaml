@@ -1,0 +1,18 @@
+rendering:
+    training_config_path: "training_pipeline/config.yaml"  # Training configuration used to rebuild the environment.
+    run_dir: null  # Run directory containing checkpoints.
+    checkpoint_path: null  # Exact checkpoint; null selects the latest final checkpoint.
+    policy_type: null  # Options: ppo, stateful_ppo, or null for automatic selection.
+    device: "auto"
+
+    seed: null  # First episode seed; null uses the training configuration.
+    episodes: 1
+    deterministic: true
+    delay_seconds: 0.0
+
+    warning_zones: true
+    path_waypoints: true
+
+    record_video: false  # Save the same rendered frames shown by SocNavGym to an MP4 file.
+    video_path: "videos/rendered_agent.mp4"  # Output MP4 path used when record_video is true.
+    video_fps: 10.0  # Playback frame rate; one video frame is written per environment step.

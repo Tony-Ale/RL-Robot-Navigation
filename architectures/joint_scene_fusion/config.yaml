@@ -1,0 +1,43 @@
+model:
+    robot_input_dim: 9  # Number of raw robot observation features from SocNavGym.
+    entity_input_dim: 14  # Number of raw human/entity observation features from SocNavGym.
+    output_dim: 1  # Number of values produced by the final head; use 1 for a value/critic output.
+    return_attention: true  # Return attention weights and intermediate tensors for debugging.
+
+scene_encoding:
+    bigru_hidden_size: 32  # Hidden size per direction for the single BiGRU; output becomes 64-D.
+    bigru_layers: 1  # Number of stacked GRU layers in the single scene encoder.
+    dropout: 0.0  # Dropout between GRU layers; only active when bigru_layers > 1.
+
+robot_projection:
+    hidden_dims: [150,100]  # Optional hidden sizes before projecting the single robot observation.
+    output_dim: 64  # Robot embedding size.
+    activation: "relu"  # Activation used if hidden_dims is not empty: relu, tanh, gelu, or elu.
+    dropout: 0.0  # Dropout applied after hidden activations in the robot projection MLP.
+
+interaction_embedding:
+    hidden_dims: [150, 100]  # MLP_0 sizes that map the 128-D [robot_context, scene_context] input to u_k.
+    activation: "relu"  # Activation used after hidden linear layers.
+    dropout: 0.0  # Dropout applied after hidden activations in MLP_0.
+
+feature_reduction:
+    hidden_dims: [100]  # MLP_lambda hidden sizes before reducing each u_k feature vector.
+    output_dim: 64  # Reduced feature size lambda_k before attention-weighted pooling.
+    activation: "relu"  # Activation used in the feature-reduction MLP.
+    dropout: 0.0  # Dropout applied after hidden activations in the feature-reduction MLP.
+
+attention:
+    hidden_dims: [100, 100]  # Hidden sizes for the attention MLP applied to [u_k, global_mean].
+    activation: "relu"  # Activation used in the attention MLP.
+    dropout: 0.0  # Dropout applied after hidden activations in the attention MLP.
+    use_mask: true  # Ignore padded entities when computing mean pooling and attention weights.
+
+prediction_head:
+    enabled: false  # Disabled for PPO; PPO uses the fused 128-D feature tensor and its own actor/critic heads.
+    hidden_dims: [150, 100, 100]  # Final MLP_v hidden sizes after concatenating robot context and social context.
+    activation: "relu"  # Activation used in the prediction/value head.
+    dropout: 0.0  # Dropout applied after hidden activations in the final head.
+
+initialization:
+    orthogonal_gru: true  # Apply orthogonal initialization to recurrent GRU hidden weights.
+    linear_gain: 1.0  # Xavier gain used for linear layers.

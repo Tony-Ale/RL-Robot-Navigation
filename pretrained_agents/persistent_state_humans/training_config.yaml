@@ -1,0 +1,99 @@
+experiment:
+    name: "recurrent_ppo_stateful_reduced_epoch"
+    output_root: "runs"
+    seed: 4042
+    run_id: null
+    resume_run_dir: null
+    copy_config: true
+
+environment:
+    id: "SocNavGym-v1"
+    config_path: "pretrained_agents/persistent_state_humans/environment_config.yaml"
+    use_socnavgym_clone: false  # Use socnavgym_clone_path instead of the installed SocNavGym package.
+    socnavgym_clone_path: "SocNavGym"
+    gymnasium_compatibility: true
+    render_during_training: false
+    render_interval_steps: 1
+    monitor: true
+
+wrappers:
+    diff_drive_action:
+        enabled: true
+    drop_empty_observation_keys:
+        enabled: true
+    fixed_observation_space:
+        enabled: false  # Pad selected native entity observations to counts from a target SocNavGym config.
+        config_path: "env_configs/env_main.yaml"  # Used only when this wrapper is enabled.
+        include_keys: ["humans"]  # Native entity keys to fix; wall capacity belongs to nearest_wall_segments.
+    observation_history:
+        enabled: false  # Required: recurrent state carries history without overlapping observation windows.
+        history_length: 8
+        temporal_entity_keys: ["humans"]  # Unused while observation history is disabled.
+    astar:
+        enabled: true
+        config_path: "global_planning/astar_wrapper_config.yaml"
+    nearest_wall_segments:
+        enabled: false  # Add fixed-capacity wall rows under observation_key.
+        mode: "nearest"  # Stateful wall entities require "all" so each recurrent slot keeps its identity.
+        count: 4  # Fixed wall capacity; "all" raises an error if an episode produces more rows.
+        include_boundary_walls: false  # False exposes corridor walls only; supported for square and rectangle rooms.
+        observation_key: "walls"  # Include this key in architecture.entity_keys when walls are enabled.
+    navigation_features:
+        enabled: true
+        config_path: "navigation_features/config.yaml"
+    warning_zone_visualization:
+        enabled: true
+        config_path: "custom_rewards/warning_zone_visualization_config.yaml"
+
+architecture:
+    name: "stateful_social_context_fusion"
+    config_path: "pretrained_agents/persistent_state_humans/architecture_config.yaml"
+    entity_keys: ["humans"]  # Any fixed, slot-stable subset of humans, laptops, tables, plants and configured walls.
+    entity_feature_dim: 14  # SocNavGym feature width shared by every configured entity row.
+    mask_zero_entities: true  # Keep padded entity slots out of recurrent state, context means and attention.
+    include_waypoint_features: true  # Append waypoint features to the robot input before its stateful GRU.
+
+ppo:
+    learning_rate: 0.0001
+    n_steps: 2048  # Ordered rollout steps retained by recurrent PPO.
+    batch_size: 64  # Transition budget per recurrent minibatch; temporal order is preserved inside sequences.
+    n_epochs: 1
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    target_kl: null
+    device: "auto"
+    verbose: 1
+    policy_net_arch: [150, 100, 100]
+
+training:
+    total_timesteps: 1000000
+    num_envs: 1
+    vec_env: "dummy"
+    checkpoint_interval_steps: 25000
+    log_interval: 1
+    reset_num_timesteps: false
+    resume_from_checkpoint: null
+
+testing:
+    policy_type: "stateful_ppo"
+    deterministic: true
+    test_seed_offset: 20000
+    n_test_episodes: 1
+    fixed_test_seeds: true
+
+metrics:
+    eta_log_interval_steps: 1000
+    navigation_training_csv: "navigation_training_metrics.csv"
+    navigation_evaluation_csv: "navigation_evaluation_metrics.csv"
+
+evaluation:
+    enabled: true
+    eval_interval_steps: 25000
+    n_eval_episodes: 100
+    deterministic: true
+    eval_seed_base: 11042
+    fixed_episode_seeds: true

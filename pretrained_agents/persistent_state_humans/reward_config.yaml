@@ -1,0 +1,42 @@
+reward:
+    goal_reward: 10.0  # Reward returned immediately when the robot reaches its goal.
+    timeout_penalty: -10.0  # Penalty returned if the episode exceeds the allowed time horizon.
+    human_collision_penalty: -3.0  # Penalty returned when the robot collides with a human.
+    object_collision_penalty: -3.0  # Penalty returned when the robot collides with a non-human entity.
+    goal_progress_scale: 0.1  # Scales active-target progress; targets the first unreached waypoint, then falls back to the global goal.
+
+checkpoint_reward:
+    enabled: true  # If true, reward each active sequential A*/waypoint checkpoint once when the robot enters the advance radius.
+    reward: 0.1  # Reward paid when the active sequential waypoint is reached.
+    advance_radius: 0.3  # Distance threshold for considering the active waypoint reached; used by the reward when the navigation wrapper has not published its advance radius.
+
+dynamic_warning_zone:
+    warning_zone_scale: 0.2  # Multiplier in the warning-zone penalty: scale * (exp(d - r_wz - robot_radius) - 1).
+    radius_speed_scale: 0.8  # Coefficient in the paper radius equation: r_wz = radius_speed_scale * human_speed + gait_length.
+    gait_width_scale: 0.7  # Scale applied to human width in the gait-width term.
+    angle_scale_pi: 2.2  # Coefficient in the paper angle equation: phi_wz = angle_scale_pi*pi*exp(-angle_speed_decay*speed) + angle_offset_pi*pi.
+    angle_speed_decay: 1.7  # Exponential decay coefficient controlling how the sector narrows as human speed increases.
+    angle_offset_pi: 0.2  # Minimum angular offset, in multiples of pi, added to the dynamic sector angle.
+    heading_angle_offset: 0.0  # Angle added to human.orientation for reward and visualization sectors; 0 keeps sectors centered on SocNavGym's motion heading.
+
+humans:
+    default_human_radius: 0.3  # Fallback human radius, in meters; also used as h_gait fallback when a human has no width field.
+    include_static_humans: true  # If true, static humans contribute to warning-zone checks.
+    include_dynamic_humans: true  # If true, moving humans contribute to warning-zone checks.
+    include_interaction_humans: true  # If true, humans inside human-human and human-laptop interactions are included.
+
+static_obstacle_warning_zone:
+    enabled: false  # Penalize close surface clearance from enabled static obstacles during shaped, non-terminal steps.
+    warning_clearance: 0.2  # Free space in metres between the robot body and obstacle surface where the penalty begins.
+    warning_zone_scale: 0.1  # Multiplier in scale * (exp(clearance - warning_clearance) - 1).
+    include_walls: false  # Include physical SocNavGym wall objects; reward is independent of observation segmentation.
+    include_boundary_walls: false  # False matches corridor-only wall observations in square and rectangle rooms.
+    include_tables: false  # Enable only when table observations are available to the policy.
+    include_plants: true  # Enable only when plant observations are available to the policy.
+    include_laptops: false  # Enable only when laptop observations are available to the policy.
+
+stagnation_penalty:
+    enabled: false  # Penalize prolonged lack of displacement during non-terminal shaped steps.
+    window_steps: 24  # Number of steps in the displacement window.
+    min_displacement: 0.2  # If displacement over the window is below this many meters, the robot is considered stalled.
+    penalty: -0.01  # Added each shaped step while stalled; goal, collision, and timeout terminal rewards are unchanged.

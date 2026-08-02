@@ -1,0 +1,36 @@
+model:
+    robot_input_dim: 9  # Current robot features; the pipeline updates this when waypoint features are included.
+    entity_input_dim: 14  # Features in one current SocNavGym entity observation row.
+    output_dim: 1  # Values produced by the optional prediction head.
+    return_attention: true  # Expose attention and intermediate contexts for inspection.
+
+robot_encoding:
+    enabled: true  # Project robot features before PPO; false passes the current raw robot vector to PPO.
+    output_dim: 64  # Robot embedding size.
+    activation: "relu"
+
+joint_embedding:
+    hidden_dims: [256, 150, 100]  # Shared MLP applied to every concatenated [robot, entity] pair; final size is u_k.
+    activation: "relu"
+    dropout: 0.0
+
+feature_reduction:
+    hidden_dims: [100]  # Reduce each joint interaction embedding before attention-weighted pooling.
+    output_dim: 64
+    activation: "relu"
+    dropout: 0.0
+
+attention:
+    hidden_dims: [100, 100]  # Score each interaction using its local embedding and masked global context.
+    activation: "relu"
+    dropout: 0.0
+    use_mask: true  # Exclude zero-padded entities from global context, attention and pooling.
+
+prediction_head:
+    enabled: false  # PPO consumes the fused robot and social context through its own actor and critic heads.
+    hidden_dims: [150, 100, 100]
+    activation: "relu"
+    dropout: 0.0
+
+initialization:
+    linear_gain: 1.0  # Xavier gain used for linear layers.

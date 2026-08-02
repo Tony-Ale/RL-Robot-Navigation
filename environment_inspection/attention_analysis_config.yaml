@@ -1,0 +1,29 @@
+attention_analysis:
+    training_config_path: "pretrained_agents/persistent_state_humans_plants/training_config.yaml"
+    checkpoint: "pretrained_agents/persistent_state_humans_plants/model.zip"
+    output_dir: "outputs/attention_analysis"
+    deterministic: true
+    max_steps: 401
+
+    seeds: [24150]
+    selection:
+        comparison_csv: "outputs/checkpoint_orca_comparison.csv"  # Used only when seeds is empty.
+        mode: "random"  # Options: first or random.
+        random_seed: 3042
+        per_category: 1
+        categories:
+            - agent_success_orca_failure
+            - agent_collision
+            - agent_timeout
+            - both_success
+
+    frames:
+        enabled: true
+        label_entities: true
+
+    plots:
+        save_individual: true
+        save_overview: true
+        dpi: 180
+        attention_min: 0.0
+        attention_max: 0.5
