@@ -4,9 +4,11 @@ This project addresses two-dimensional social robot navigation: a differential-d
 
 ## Demonstration
 
+### [Watch the navigation demonstration on YouTube](https://www.youtube.com/shorts/wWftZB54Prw)
+
 [![Watch the human-and-plant navigation demonstration](https://img.youtube.com/vi/wWftZB54Prw/maxresdefault.jpg)](https://www.youtube.com/shorts/wWftZB54Prw)
 
-The demonstration replays seed `24150`, a successful held-out episode with a long A* reference path. The video is recorded at 4 FPS to match the environment's 0.25-second simulation timestep.
+Click the preview to play the video. The demonstration replays seed `24150`, a successful held-out episode with a long A* reference path. The video is recorded at 4 FPS to match the environment's 0.25-second simulation timestep.
 
 ## Contribution
 
