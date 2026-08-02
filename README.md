@@ -4,13 +4,9 @@ This project addresses two-dimensional social robot navigation: a differential-d
 
 ## Demonstration
 
-<video controls width="900" src="assets/persistent_state_humans_plants_longest_success.mp4">
-  Your browser does not support embedded MP4 video.
-</video>
+[![Watch the human-and-plant navigation demonstration](https://img.youtube.com/vi/wWftZB54Prw/maxresdefault.jpg)](https://www.youtube.com/shorts/wWftZB54Prw)
 
-[Open the human-and-plant navigation video](assets/persistent_state_humans_plants_longest_success.mp4)
-
-The demonstration replays seed `24150`, a successful held-out episode with a long A* reference path. The MP4 is recorded at 4 FPS to match the environment's 0.25-second simulation timestep.
+The demonstration replays seed `24150`, a successful held-out episode with a long A* reference path. The video is recorded at 4 FPS to match the environment's 0.25-second simulation timestep.
 
 ## Contribution
 
@@ -53,8 +49,8 @@ The tested setup uses Python 3.10 on Linux/WSL. This project depends on
 including Python-RVO2 and DGL. Python-RVO2 requires a C++ compiler and CMake.
 
 ```bash
-git clone https://github.com/Tony-Ale/Hierarchical-Navigation.git
-cd Hierarchical-Navigation
+git clone https://github.com/Tony-Ale/RL-Robot-Navigation.git
+cd RL-Robot-Navigation
 sudo apt-get install -y build-essential cmake python3-dev python3-venv git
 python -m venv .venv
 source .venv/bin/activate
